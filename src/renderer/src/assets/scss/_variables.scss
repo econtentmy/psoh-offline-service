@@ -1,0 +1,102 @@
+// PSOH Design System Variables
+// Ported from psoh-webapp-service
+
+// Note: Fonts are imported via @fontsource/rubik in main.ts
+
+// Color Palette
+$white: #fff;
+$gray-100: #f6f8f9;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #afb5c1;
+$gray-600: #6c757d;
+$gray-700: #4f5467;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black: #000;
+
+// Theme Colors
+$blue: #137eff;
+$indigo: #6610f2;
+$purple: #8b5edd;
+$pink: #e83e8c;
+$red: #fa5838;
+$orange: #fb8c00;
+$yellow: #ffbc34;
+$green: #5ac146;
+$teal: #20c997;
+$cyan: #4fc3f7;
+
+// Semantic Colors
+$primary: $blue;
+$secondary: $gray-600;
+$success: $green;
+$info: $blue;
+$warning: $yellow;
+$danger: $red;
+$light: $gray-100;
+$dark: $gray-800;
+
+// PSOH Brand Colors
+$brand-primary: #026670;      // Main brand color (Teal)
+$brand-secondary: #16A1D5;    // Secondary brand color (Light Blue)
+$sidebar-active: #16A1D5;     
+$sidebar-hover: #F0F8FB;
+
+// Light variants
+$light-danger: #f9e7eb;
+$light-success: #c5f7cb;
+$light-warning: #ffedc9;
+$light-primary: #ddd8fd;
+$light-info: #aedcf7;
+$light-inverse: #f6f6f6;
+$light-secondary: #dde1e4;
+
+// Body
+$body-bg: #f2f4f5;
+$body-color: #6a7a8c;
+
+// Typography
+$font-family-base: 'Rubik', sans-serif;
+$font-size-base: 0.875rem;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// Headings
+$h1-font-size: 36px;
+$h2-font-size: 30px;
+$h3-font-size: 24px;
+$h4-font-size: 18px;
+$h5-font-size: 16px;
+$h6-font-size: 14px;
+
+// Borders
+$border-radius: 2px;
+$border-radius-lg: 5px;
+$border-radius-sm: 1px;
+$border-color: rgba(0, 0, 0, 0.1);
+
+// Shadows
+$box-shadow-sm: 0px 2px 9px 0px rgba(169, 184, 200, 0.2);
+$box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
+// Cards
+$card-border-radius: 0;
+$card-border-width: 0;
+$card-spacer-x: 1.25rem;
+$card-spacer-y: 1.25rem;
+
+// Sidebar
+$sidebar-width: 250px;
+$sidebar-mini-width: 65px;
+$sidebar-bg: #fff;
+
+// Topbar
+$topbar-height: 64px;
+$topbar-bg: $brand-primary;
+
+// Text muted
+$text-muted: #8392a5;
