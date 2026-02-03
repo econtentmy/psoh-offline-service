@@ -191,7 +191,7 @@ function resetSearch(): void {
 }
 
 // Format status tanah for display
-function formatStatusTanah(status: string | null): string {
+function formatStatusTanah(status: string | null | undefined): string {
   if (!status) return '-'
   const statusMap: Record<string, string> = {
     'hsk': 'Hutan Simpan Kekal (HSK)',
@@ -205,14 +205,14 @@ function formatStatusTanah(status: string | null): string {
 }
 
 // Format daerah - lookup name from reference data
-function formatDaerah(daerah: string | number | null): string {
+function formatDaerah(daerah: string | number | null | undefined): string {
   if (!daerah) return '-'
   const found = daerahList.value.find((d) => d.id === Number(daerah) || d.kod === String(daerah))
   return found?.nama || String(daerah)
 }
 
 // Format kompartmen from JSON array to readable string
-function formatKompartmen(kompartmen: string | null): string {
+function formatKompartmen(kompartmen: string | null | undefined): string {
   if (!kompartmen) return '-'
   
   try {

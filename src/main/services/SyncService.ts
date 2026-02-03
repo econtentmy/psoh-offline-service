@@ -5,8 +5,6 @@ import { BrowserWindow } from 'electron'
 
 export class SyncService extends EventEmitter {
   private static instance: SyncService
-  private apiUrl: string = ''
-  private apiToken: string = ''
   private axiosInstance: AxiosInstance | null = null
   private isSyncing: boolean = false
 
@@ -22,9 +20,6 @@ export class SyncService extends EventEmitter {
   }
 
   setApiConfig(apiUrl: string, apiToken: string): void {
-    this.apiUrl = apiUrl
-    this.apiToken = apiToken
-
     this.axiosInstance = axios.create({
       baseURL: `${apiUrl}/api/offline`,
       headers: {
