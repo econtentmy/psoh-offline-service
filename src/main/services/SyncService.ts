@@ -99,7 +99,8 @@ export class SyncService extends EventEmitter {
             permohonan_id: assignment.permohonan_id || null,
             status_id: assignment.status_id || null,
             kaedah: assignment.kaedah || null,
-            no_ruj_surat_lulus: assignment.no_ruj_surat_lulus || assignment.no_ruj_fail || null,
+            no_ruj_surat_lulus: assignment.no_ruj_surat_lulus || null,
+            no_fail: assignment.no_fail || assignment.no_ruj_fail || null,
             status_tanah: assignment.status_tanah || null,
             daerah: assignment.daerah_hutan || assignment.daerah || null,
             kompartmen: assignment.kompartmen || null

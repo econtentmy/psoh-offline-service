@@ -1,133 +1,225 @@
 <template>
-  <div class="sync-status-page">
-    <div class="row py-3">
-      <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h4 class="mb-0 text-uppercase">Status Sinkronisasi</h4>
-          <button
-            class="btn btn-rounded btn-info"
-            @click="handleSync"
-            :disabled="!isOnline || isSyncing || !hasPending"
-          >
-            <span class="ri-refresh-line" :class="{ spin: isSyncing }"></span>
-            {{ isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Sekarang' }}
-          </button>
-        </div>
+  <div class="sync-status-page p-2">
+    <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
+      <div>
+        <h4 class="mb-1 text-uppercase fw-bold text-dark">Status Sinkronisasi</h4>
+        <p class="text-muted small mb-0">
+          Pantau status pemindahan data antara peranti dan pelayan pusat.
+        </p>
+      </div>
+      <button
+        class="btn btn-primary d-flex align-items-center gap-2 px-3"
+        @click="handleSync"
+        :disabled="!isOnline || isSyncing || !hasPending"
+      >
+        <span :class="['ri-refresh-line', { spin: isSyncing }]"></span>
+        {{ isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Sekarang' }}
+      </button>
+    </div>
 
-        <!-- Stats -->
-        <div class="row mb-4">
-          <div class="col-4">
-            <div class="stat-card info">
-              <div class="stat-value">{{ syncStatus.synced }}</div>
-              <div class="stat-label">Telah Disinkronkan</div>
-            </div>
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-4">
+        <div class="stat-card sync-success">
+          <div class="stat-icon">
+            <span class="ri-checkbox-circle-line"></span>
           </div>
-          <div class="col-4">
-            <div class="stat-card warning">
-              <div class="stat-value">{{ syncStatus.pending }}</div>
-              <div class="stat-label">Menunggu Sinkronisasi</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="stat-card" :class="isOnline ? 'success' : 'danger'">
-              <div class="stat-value">{{ isOnline ? 'Aktif' : 'Tiada' }}</div>
-              <div class="stat-label">Sambungan Internet</div>
-            </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ syncStatus.synced }}</div>
+            <div class="stat-label">Telah Disinkronkan</div>
           </div>
         </div>
+      </div>
+      <div class="col-4">
+        <div class="stat-card sync-pending">
+          <div class="stat-icon">
+            <span class="ri-time-line"></span>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ syncStatus.pending }}</div>
+            <div class="stat-label">Menunggu Sinkronisasi</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div :class="['stat-card', isOnline ? 'conn-active' : 'conn-inactive']">
+          <div class="stat-icon">
+            <span :class="isOnline ? 'ri-wifi-line' : 'ri-wifi-off-line'"></span>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value fs-4">{{ isOnline ? 'AKTIF' : 'TIADA' }}</div>
+            <div class="stat-label">Sambungan Internet</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <!-- Pending Records -->
-        <div class="card border-bottom border-info shadow">
-          <div class="card-body">
-            <h5 class="mb-3">Rekod Menunggu Sinkronisasi</h5>
+    <div class="row g-4">
+      <!-- Pending Records -->
+      <div class="col-8">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-4">
+              <span class="ri-database-2-line text-primary fs-5"></span>
+              <h6 class="mb-0 fw-bold">Rekod Menunggu Sinkronisasi</h6>
+            </div>
 
             <!-- Progress Bar (when syncing) -->
-            <div v-if="isSyncing" class="mb-4">
-              <div class="progress-info mb-2">
-                <span>Menyinkronkan rekod...</span>
-                <span>{{ syncProgress.current }} / {{ syncProgress.total }}</span>
+            <Transition name="fade">
+              <div v-if="isSyncing" class="sync-progress-container mb-4">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="small fw-medium text-primary">Menghantar data ke pelayan...</span>
+                  <span class="small fw-bold"
+                    >{{ syncProgress.current }} / {{ syncProgress.total }}</span
+                  >
+                </div>
+                <div class="progress" style="height: 10px">
+                  <div
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    :style="{ width: progressPercent + '%' }"
+                  ></div>
+                </div>
               </div>
-              <div class="progress">
-                <div
-                  class="progress-bar"
-                  :style="{ width: progressPercent + '%' }"
-                ></div>
-              </div>
-            </div>
+            </Transition>
 
-            <!-- Pending Tags -->
-            <div class="pending-section mb-3">
-              <h6>
-                <span class="ri-price-tag-3-line"></span> Tag Pokok
-                <span class="badge bg-warning ms-2">{{ pendingRecords.tags.length }}</span>
-              </h6>
-              <div v-if="pendingRecords.tags.length === 0" class="text-muted">
-                Tiada rekod menunggu
+            <!-- Record Sections -->
+            <div class="pending-grid">
+              <!-- Tag Pokok -->
+              <div class="pending-section border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="ri-price-tag-3-line text-primary"></span>
+                    <span class="fw-bold small text-dark">Tag Pokok</span>
+                  </div>
+                  <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3">{{
+                    pendingRecords.tags.length
+                  }}</span>
+                </div>
+                <div v-if="pendingRecords.tags.length === 0" class="empty-state">
+                  <p class="text-muted small mb-0 mt-1">Tiada rekod menunggu</p>
+                </div>
+                <ul v-else class="list-unstyled mb-0 pending-list">
+                  <li
+                    v-for="tag in pendingRecords.tags.slice(0, 3)"
+                    :key="tag.id"
+                    class="small py-2 border-bottom"
+                  >
+                    <div class="d-flex justify-content-between">
+                      <span class="text-dark fw-medium">Tag #{{ tag.no_tag }}</span>
+                      <span class="text-muted">{{ formatDate(tag.recorded_at) }}</span>
+                    </div>
+                  </li>
+                  <li v-if="pendingRecords.tags.length > 3" class="pt-2 text-center">
+                    <small class="text-primary fw-medium"
+                      >+ {{ pendingRecords.tags.length - 3 }} rekod lagi</small
+                    >
+                  </li>
+                </ul>
               </div>
-              <ul v-else class="pending-list">
-                <li v-for="tag in pendingRecords.tags.slice(0, 5)" :key="tag.id">
-                  Tag #{{ tag.no_tag }} - {{ tag.jenis_tag }} 
-                  <small class="text-muted">({{ formatDate(tag.recorded_at) }})</small>
-                </li>
-                <li v-if="pendingRecords.tags.length > 5" class="text-muted">
-                  ... dan {{ pendingRecords.tags.length - 5 }} rekod lagi
-                </li>
-              </ul>
-            </div>
 
-            <!-- Pending Lokasi -->
-            <div class="pending-section mb-3">
-              <h6>
-                <span class="ri-map-pin-line"></span> Lokasi Penandaan
-                <span class="badge bg-warning ms-2">{{ pendingRecords.lokasi.length }}</span>
-              </h6>
-              <div v-if="pendingRecords.lokasi.length === 0" class="text-muted">
-                Tiada rekod menunggu
+              <!-- Lokasi -->
+              <div class="pending-section border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="ri-map-pin-line text-primary"></span>
+                    <span class="fw-bold small text-dark">Lokasi Penandaan</span>
+                  </div>
+                  <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3">{{
+                    pendingRecords.lokasi.length
+                  }}</span>
+                </div>
+                <div v-if="pendingRecords.lokasi.length === 0" class="empty-state">
+                  <p class="text-muted small mb-0 mt-1">Tiada rekod menunggu</p>
+                </div>
+                <ul v-else class="list-unstyled mb-0 pending-list">
+                  <li
+                    v-for="lok in pendingRecords.lokasi.slice(0, 3)"
+                    :key="lok.id"
+                    class="small py-2 border-bottom"
+                  >
+                    <div class="d-flex justify-content-between">
+                      <span class="text-dark fw-medium">{{ lok.tarikh }}</span>
+                      <span class="text-muted">{{ formatDate(lok.recorded_at) }}</span>
+                    </div>
+                  </li>
+                  <li v-if="pendingRecords.lokasi.length > 3" class="pt-2 text-center">
+                    <small class="text-primary fw-medium"
+                      >+ {{ pendingRecords.lokasi.length - 3 }} rekod lagi</small
+                    >
+                  </li>
+                </ul>
               </div>
-              <ul v-else class="pending-list">
-                <li v-for="lok in pendingRecords.lokasi.slice(0, 5)" :key="lok.id">
-                  {{ lok.tarikh }}
-                  <small class="text-muted">({{ formatDate(lok.recorded_at) }})</small>
-                </li>
-                <li v-if="pendingRecords.lokasi.length > 5" class="text-muted">
-                  ... dan {{ pendingRecords.lokasi.length - 5 }} rekod lagi
-                </li>
-              </ul>
-            </div>
 
-            <!-- Pending Aktiviti -->
-            <div class="pending-section">
-              <h6>
-                <span class="ri-calendar-line"></span> Aktiviti Penandaan
-                <span class="badge bg-warning ms-2">{{ pendingRecords.aktiviti.length }}</span>
-              </h6>
-              <div v-if="pendingRecords.aktiviti.length === 0" class="text-muted">
-                Tiada rekod menunggu
+              <!-- Aktiviti -->
+              <div class="pending-section border rounded-3 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="ri-calendar-line text-primary"></span>
+                    <span class="fw-bold small text-dark">Aktiviti</span>
+                  </div>
+                  <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3">{{
+                    pendingRecords.aktiviti.length
+                  }}</span>
+                </div>
+                <div v-if="pendingRecords.aktiviti.length === 0" class="empty-state">
+                  <p class="text-muted small mb-0 mt-1">Tiada rekod menunggu</p>
+                </div>
+                <ul v-else class="list-unstyled mb-0 pending-list">
+                  <li
+                    v-for="akt in pendingRecords.aktiviti.slice(0, 3)"
+                    :key="akt.id"
+                    class="small py-2 border-bottom"
+                  >
+                    <div class="d-flex justify-content-between">
+                      <span class="text-dark fw-medium">{{ akt.aktiviti }}</span>
+                      <span class="text-muted">{{ formatDate(akt.recorded_at) }}</span>
+                    </div>
+                  </li>
+                  <li v-if="pendingRecords.aktiviti.length > 3" class="pt-2 text-center">
+                    <small class="text-primary fw-medium"
+                      >+ {{ pendingRecords.aktiviti.length - 3 }} rekod lagi</small
+                    >
+                  </li>
+                </ul>
               </div>
-              <ul v-else class="pending-list">
-                <li v-for="akt in pendingRecords.aktiviti.slice(0, 5)" :key="akt.id">
-                  {{ akt.aktiviti }} - {{ akt.tarikh }}
-                  <small class="text-muted">({{ formatDate(akt.recorded_at) }})</small>
-                </li>
-                <li v-if="pendingRecords.aktiviti.length > 5" class="text-muted">
-                  ... dan {{ pendingRecords.aktiviti.length - 5 }} rekod lagi
-                </li>
-              </ul>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Last Sync Info -->
-        <div class="card border-bottom border-info shadow mt-4">
-          <div class="card-body">
-            <h5 class="mb-3">Maklumat Sinkronisasi</h5>
-            <div class="info-row">
-              <span class="info-label">Sinkronisasi Terakhir:</span>
-              <span class="info-value">{{ lastSyncFormatted }}</span>
+      <!-- Last Sync Info -->
+      <div class="col-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-4">Maklumat Tambahan</h6>
+            <div class="sync-info-pills">
+              <div class="info-pill mb-3">
+                <label class="d-block small text-muted mb-1">Terakhir Dikemaskini</label>
+                <div class="fw-bold text-dark">{{ lastSyncFormatted }}</div>
+              </div>
+              <div class="info-pill mb-3">
+                <label class="d-block small text-muted mb-1">Status Peranti</label>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="status-indicator active"></div>
+                  <span class="fw-medium text-dark">Luar Talian (Offline Mode)</span>
+                </div>
+              </div>
             </div>
-            <div v-if="syncStore.error" class="alert alert-danger mt-3 mb-0">
-              <span class="ri-error-warning-line"></span>
-              {{ syncStore.error }}
+
+            <div v-if="syncStore.error" class="alert alert-danger-subtle border-0 rounded-3 mt-4">
+              <div class="d-flex gap-2">
+                <span class="ri-error-warning-line fw-bold"></span>
+                <span class="small">{{ syncStore.error }}</span>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded-3 bg-light-info">
+              <div class="d-flex gap-2">
+                <span class="ri-information-line text-primary fs-5"></span>
+                <p class="small text-muted mb-0">
+                  Sinkronisasi akan memindahkan rekod tempatan ke pangkalan data pusat PSOH.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -157,11 +249,11 @@ const progressPercent = computed(() => {
 })
 
 const lastSyncFormatted = computed(() => {
-  if (!syncStatus.value.lastSync) return 'Belum pernah'
+  if (!syncStatus.value.lastSync) return 'Tiada rekod'
   const date = new Date(syncStatus.value.lastSync)
   return date.toLocaleString('ms-MY', {
     day: '2-digit',
-    month: '2-digit',
+    month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
@@ -171,9 +263,7 @@ const lastSyncFormatted = computed(() => {
 function formatDate(dateStr: string): string {
   if (!dateStr) return '-'
   const date = new Date(dateStr)
-  return date.toLocaleString('ms-MY', {
-    day: '2-digit',
-    month: '2-digit',
+  return date.toLocaleTimeString('ms-MY', {
     hour: '2-digit',
     minute: '2-digit'
   })
@@ -193,98 +283,112 @@ onMounted(async () => {
 
 <style scoped>
 .sync-status-page {
-  min-height: 400px;
+  min-height: 500px;
 }
 
+/* Stat Cards */
 .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
   padding: 1.5rem;
-  border-radius: 8px;
-  color: #fff;
-  text-align: center;
+  border-radius: var(--border-radius-lg);
+  background: #fff;
+  box-shadow: var(--box-shadow);
+  border: 1px solid var(--border-color);
 }
 
-.stat-card.info {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
-.stat-card.warning {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+.sync-success .stat-icon {
+  background-color: var(--light-success);
+  color: var(--success);
 }
-
-.stat-card.success {
-  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+.sync-pending .stat-icon {
+  background-color: var(--light-warning);
+  color: var(--warning);
 }
-
-.stat-card.danger {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+.conn-active .stat-icon {
+  background-color: var(--light-primary);
+  color: var(--primary);
+}
+.conn-inactive .stat-icon {
+  background-color: var(--light-danger);
+  color: var(--danger);
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  color: var(--gray-900);
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 0.875rem;
-  opacity: 0.9;
-}
-
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  color: var(--gray-600);
-}
-
-.progress {
-  height: 8px;
-  background-color: var(--gray-200);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background-color: var(--info);
-  transition: width 0.3s ease;
-}
-
-.pending-section h6 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--gray-700);
-}
-
-.pending-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.pending-list li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--gray-200);
-  font-size: 0.875rem;
-}
-
-.pending-list li:last-child {
-  border-bottom: none;
-}
-
-.info-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.info-label {
-  color: var(--gray-600);
-}
-
-.info-value {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin-top: 0.25rem;
   font-weight: 500;
-  color: var(--gray-800);
+}
+
+/* Pending Stats Grid */
+.pending-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.pending-section {
+  background-color: var(--gray-50);
+  border-color: var(--gray-100) !important;
+}
+
+.bg-warning-subtle {
+  background-color: var(--light-warning) !important;
+}
+
+/* Status Indicator */
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--gray-300);
+}
+.status-indicator.active {
+  background-color: var(--success);
+  box-shadow: 0 0 0 3px var(--light-success);
+}
+
+.alert-danger-subtle {
+  background-color: var(--light-danger);
+  color: var(--danger);
+  padding: 1rem;
+}
+
+.spin {
+  animation: spinner 1.5s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

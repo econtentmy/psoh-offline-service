@@ -410,3 +410,23 @@
 .ri-price-tag-3-line::before { content: "🏷️"; }
 .ri-map-pin-line::before { content: "📍"; }
 .ri-calendar-line::before { content: "📅"; }
+.ri-arrow-right-s-line::before { content: "▶"; }
+.ri-arrow-down-s-line::before { content: "▼"; }
+.ri-arrow-left-line::before { content: "⬅"; }
+.ri-information-line::before { content: "ℹ️"; }
+.ri-survey-line::before { content: "📋"; }
+.ri-hash::before { content: "#"; }
+.ri-filter-2-line::before { content: "🔍"; }
+.ri-checkbox-circle-line::before { content: "✅"; }
+.ri-time-line::before { content: "🕒"; }
+.ri-folder-open-line::before { content: "📂"; }
+.ri-file-list-3-line::before { content: "📋"; }
+.ri-settings-4-line::before { content: "⚙️"; }
+.ri-database-2-line::before { content: "🗄️"; }
+
+/* Grid label fix */
+.info-group label {
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+}

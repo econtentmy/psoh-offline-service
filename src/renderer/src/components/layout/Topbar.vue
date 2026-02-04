@@ -6,23 +6,17 @@
         <a class="nav-toggler" href="#" @click.prevent="$emit('toggle-sidebar')">
           <span class="ri-menu-line"></span>
         </a>
-        
+
         <!-- Logo -->
         <div class="navbar-brand">
           <router-link to="/" class="logo">
             <span class="logo-text">
-              <img 
-                :src="logoUrl" 
-                alt="PSOH Logo" 
-                width="60" 
-                height="60"
-                class="logo-img"
-              />
+              <img :src="logoUrl" alt="PSOH Logo" width="60" height="60" class="logo-img" />
             </span>
           </router-link>
         </div>
       </div>
-      
+
       <!-- Right side -->
       <div class="navbar-content">
         <ul class="navbar-nav">
@@ -30,16 +24,20 @@
           <li class="nav-item">
             <SyncIndicator />
           </li>
-          
+
           <!-- User dropdown -->
           <li class="nav-item dropdown" v-if="user">
-            <a class="nav-link dropdown-toggle" href="#" @click.prevent="showUserMenu = !showUserMenu">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              @click.prevent="showUserMenu = !showUserMenu"
+            >
               <span class="user-avatar">
                 <span class="ri-user-line"></span>
               </span>
               <span class="user-name">{{ user.name }}</span>
             </a>
-            
+
             <div class="dropdown-menu" :class="{ show: showUserMenu }">
               <div class="user-header">
                 <div class="user-avatar-lg">
@@ -98,7 +96,10 @@ async function handleLogout(): Promise<void> {
   height: var(--topbar-height);
   background-color: var(--brand-primary);
   z-index: 100;
-  transition: left 0.3s ease;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .sidebar-mini .topbar {
@@ -110,7 +111,7 @@ async function handleLogout(): Promise<void> {
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  padding: 0 20px;
+  padding: 0 1.5rem;
 }
 
 .navbar-header {
@@ -123,6 +124,13 @@ async function handleLogout(): Promise<void> {
   color: #fff;
   font-size: 1.5rem;
   margin-right: 1rem;
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  transition: background 0.2s;
+}
+
+.nav-toggler:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -136,20 +144,13 @@ async function handleLogout(): Promise<void> {
   align-items: center;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-}
-
 .logo-img {
-  border-radius: 4px;
-  background: #fff;
-  padding: 2px;
+  border-radius: var(--border-radius);
+  transition: transform 0.2s;
 }
 
-.navbar-content {
-  display: flex;
-  align-items: center;
+.logo-img:hover {
+  transform: scale(1.05);
 }
 
 .navbar-nav {
@@ -158,52 +159,68 @@ async function handleLogout(): Promise<void> {
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 1rem;
-}
-
-.nav-item {
-  position: relative;
+  gap: 1.25rem;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   color: #fff;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: all 0.2s;
+  text-decoration: none;
 }
 
 .nav-link:hover {
-  text-decoration: none;
-  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-name {
   font-weight: 500;
+  font-size: 0.9375rem;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 10px);
   right: 0;
-  min-width: 250px;
+  min-width: 280px;
   background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
   display: none;
   z-index: 1000;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  transform-origin: top right;
+  animation: dropdownFade 0.2s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dropdown-menu.show {
@@ -215,55 +232,78 @@ async function handleLogout(): Promise<void> {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: var(--sidebar-hover-bg);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  margin-bottom: 0.5rem;
 }
 
 .user-avatar-lg {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--gray-200);
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  background: var(--brand-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: var(--gray-600);
+  font-size: 1.75rem;
+  color: #fff;
 }
 
 .user-info h4 {
   margin: 0;
   font-size: 1rem;
-  color: var(--gray-800);
+  font-weight: 600;
+  color: var(--gray-900);
 }
 
 .user-info p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--gray-600);
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
 }
 
 .dropdown-divider {
-  height: 0;
+  height: 1px;
   margin: 0.5rem 0;
-  overflow: hidden;
-  border-top: 1px solid var(--gray-200);
+  background-color: var(--gray-100);
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   padding: 0.75rem 1rem;
   color: var(--gray-700);
   text-decoration: none;
   cursor: pointer;
+  border-radius: var(--border-radius);
+  font-size: 0.9375rem;
+  transition: all 0.2s;
 }
 
 .dropdown-item:hover {
-  background: var(--gray-100);
+  background: var(--gray-50);
+  color: var(--brand-primary);
+}
+
+.dropdown-item span[class^='ri-'] {
+  font-size: 1.125rem;
+  color: var(--gray-400);
+}
+
+.dropdown-item:hover span[class^='ri-'] {
+  color: var(--brand-primary);
 }
 
 .dropdown-item.text-danger {
   color: var(--danger);
+}
+
+.dropdown-item.text-danger span {
+  color: var(--danger);
+}
+
+.dropdown-item.text-danger:hover {
+  background: var(--light-danger);
 }
 </style>

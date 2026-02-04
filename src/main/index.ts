@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -21,7 +21,7 @@ function createWindow(): void {
     minHeight: 700,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon: icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -30,8 +30,21 @@ function createWindow(): void {
     }
   })
 
+  // Show window when ready or after timeout (failsafe)
+  const showTimeout = setTimeout(() => {
+    if (mainWindow && !mainWindow.isVisible()) {
+      console.log('Forcing window show after timeout')
+      mainWindow.show()
+    }
+  }, 5000)
+
   mainWindow.on('ready-to-show', () => {
+    clearTimeout(showTimeout)
     mainWindow?.show()
+  })
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -88,10 +101,19 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // Initialize services before creating window
-  await initializeServices()
-
+  // Create window first so user sees the app
   createWindow()
+
+  // Initialize services after window is created (non-blocking)
+  try {
+    await initializeServices()
+  } catch (error) {
+    console.error('Failed to initialize services:', error)
+    dialog.showErrorBox(
+      'Initialization Error',
+      `Failed to initialize application services: ${error instanceof Error ? error.message : String(error)}`
+    )
+  }
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

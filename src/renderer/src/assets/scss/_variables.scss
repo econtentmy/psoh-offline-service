@@ -5,15 +5,16 @@
 
 // Color Palette
 $white: #fff;
-$gray-100: #f6f8f9;
-$gray-200: #e9ecef;
-$gray-300: #dee2e6;
-$gray-400: #ced4da;
-$gray-500: #afb5c1;
-$gray-600: #6c757d;
-$gray-700: #4f5467;
-$gray-800: #343a40;
-$gray-900: #212529;
+$gray-50: #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-600: #475569;
+$gray-700: #334155;
+$gray-800: #1e293b;
+$gray-900: #0f172a;
 $black: #000;
 
 // Theme Colors
@@ -24,7 +25,7 @@ $pink: #e83e8c;
 $red: #fa5838;
 $orange: #fb8c00;
 $yellow: #ffbc34;
-$green: #5ac146;
+$green: #10b981; // Refined green
 $teal: #20c997;
 $cyan: #4fc3f7;
 
@@ -39,23 +40,23 @@ $light: $gray-100;
 $dark: $gray-800;
 
 // PSOH Brand Colors
-$brand-primary: #026670;      // Main brand color (Teal)
-$brand-secondary: #16A1D5;    // Secondary brand color (Light Blue)
-$sidebar-active: #16A1D5;     
-$sidebar-hover: #F0F8FB;
+$brand-primary: #026670; // Main brand color (Teal)
+$brand-secondary: #0ea5e9; // Refined light blue
+$sidebar-active: #0ea5e9;
+$sidebar-hover: #f0f9ff; // Softer hover
 
 // Light variants
-$light-danger: #f9e7eb;
-$light-success: #c5f7cb;
-$light-warning: #ffedc9;
-$light-primary: #ddd8fd;
-$light-info: #aedcf7;
-$light-inverse: #f6f6f6;
-$light-secondary: #dde1e4;
+$light-danger: #fee2e2;
+$light-success: #dcfce7;
+$light-warning: #fef3c7;
+$light-primary: #dbeafe;
+$light-info: #e0f2fe;
+$light-inverse: #f8fafc;
+$light-secondary: #f1f5f9;
 
 // Body
-$body-bg: #f2f4f5;
-$body-color: #6a7a8c;
+$body-bg: #f8fafc; // Lighter, cleaner background
+$body-color: #334155; // Better contrast
 
 // Typography
 $font-family-base: 'Rubik', sans-serif;
@@ -66,37 +67,43 @@ $font-weight-medium: 500;
 $font-weight-bold: 700;
 
 // Headings
-$h1-font-size: 36px;
-$h2-font-size: 30px;
-$h3-font-size: 24px;
-$h4-font-size: 18px;
-$h5-font-size: 16px;
-$h6-font-size: 14px;
+$h1-font-size: 2.25rem;
+$h2-font-size: 1.875rem;
+$h3-font-size: 1.5rem;
+$h4-font-size: 1.125rem;
+$h5-font-size: 1rem;
+$h6-font-size: 0.875rem;
 
 // Borders
-$border-radius: 2px;
-$border-radius-lg: 5px;
-$border-radius-sm: 1px;
-$border-color: rgba(0, 0, 0, 0.1);
+$border-radius: 8px; // Modern standard
+$border-radius-lg: 12px;
+$border-radius-sm: 4px;
+$border-color: #e2e8f0;
 
-// Shadows
-$box-shadow-sm: 0px 2px 9px 0px rgba(169, 184, 200, 0.2);
-$box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+// Shadows - Softer, layered shadows
+$box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$box-shadow:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$box-shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
 // Cards
-$card-border-radius: 0;
-$card-border-width: 0;
-$card-spacer-x: 1.25rem;
-$card-spacer-y: 1.25rem;
+$card-border-radius: 8px;
+$card-border-width: 1px;
+$card-spacer-x: 1.5rem;
+$card-spacer-y: 1.5rem;
+$card-cap-bg: transparent;
 
 // Sidebar
-$sidebar-width: 250px;
-$sidebar-mini-width: 65px;
+$sidebar-width: 260px;
+$sidebar-mini-width: 72px;
 $sidebar-bg: #fff;
 
 // Topbar
-$topbar-height: 64px;
+$topbar-height: 72px; // Slightly taller for breathability
 $topbar-bg: $brand-primary;
 
 // Text muted
-$text-muted: #8392a5;
+$text-muted: #64748b;

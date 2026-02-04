@@ -5,8 +5,8 @@
         <ul class="sidebar-menu">
           <!-- Dashboard -->
           <li class="sidebar-item">
-            <router-link 
-              to="/" 
+            <router-link
+              to="/"
               class="sidebar-link"
               :class="{ active: $route.name === 'dashboard' }"
             >
@@ -14,17 +14,18 @@
               <span class="hide-menu">Dashboard</span>
             </router-link>
           </li>
-          
+
           <!-- Tanda Pokok Section -->
           <li class="sidebar-item" v-if="isConfigured">
-            <a 
-              href="#" 
-              class="sidebar-link has-arrow"
-              :class="{ active: isTandaPokokActive }"
+            <a
+              href="#"
+              class="sidebar-link"
+              :class="{ active: isTandaPokokActive, 'menu-open': tandaPokokOpen }"
               @click.prevent="toggleTandaPokok"
             >
               <span class="ri-price-tag-3-line"></span>
               <span class="hide-menu">Tanda Pokok</span>
+              <span class="ri-arrow-right-s-line ms-auto sidebar-arrow"></span>
             </a>
             <ul class="sub-menu" :class="{ show: tandaPokokOpen }">
               <li class="sidebar-item">
@@ -35,11 +36,11 @@
               </li>
             </ul>
           </li>
-          
+
           <!-- Sync Status -->
           <li class="sidebar-item" v-if="isConfigured">
-            <router-link 
-              to="/sync-status" 
+            <router-link
+              to="/sync-status"
               class="sidebar-link"
               :class="{ active: $route.name === 'sync-status' }"
             >
@@ -50,11 +51,11 @@
               </span>
             </router-link>
           </li>
-          
+
           <!-- Settings -->
           <li class="sidebar-item">
-            <router-link 
-              to="/settings" 
+            <router-link
+              to="/settings"
               class="sidebar-link"
               :class="{ active: $route.name === 'settings' }"
             >
@@ -109,29 +110,26 @@ onMounted(async () => {
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background: #fff;
-  box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
+  background: var(--sidebar-bg);
+  box-shadow: 1px 0 12px rgba(0, 0, 0, 0.03);
   z-index: 101;
-  transition: width 0.3s ease;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  border-right: 1px solid var(--border-color);
 }
 
 .left-sidebar.collapsed {
   width: var(--sidebar-mini-width);
 }
 
-.left-sidebar.collapsed .hide-menu {
-  display: none;
-}
-
 .scroll-sidebar {
   height: 100%;
   overflow-y: auto;
-  padding-top: calc(var(--topbar-height) + 20px);
+  padding-top: calc(var(--topbar-height) + 1.25rem);
 }
 
 .sidebar-nav {
-  padding: 0 15px;
+  padding: 0 0.75rem;
 }
 
 .sidebar-menu {
@@ -141,70 +139,98 @@ onMounted(async () => {
 }
 
 .sidebar-item {
-  margin-bottom: 2px;
+  margin-bottom: 0.25rem;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 12px 15px;
-  color: var(--gray-700);
-  border-radius: 4px;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  color: var(--gray-600);
+  border-radius: var(--border-radius);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 2px solid transparent;
+  font-weight: 500;
+  font-size: 0.9375rem;
 }
 
 .sidebar-link:hover {
-  background-color: var(--sidebar-hover-bg);
-  border-left-color: var(--sidebar-accent);
-  color: #45598C;
+  background-color: var(--sidebar-hover);
+  color: var(--brand-primary);
   text-decoration: none;
 }
 
 .sidebar-link.active {
-  background-color: var(--sidebar-hover-bg);
-  border-left-color: var(--sidebar-accent);
-  color: var(--sidebar-accent);
+  background-color: var(--light-info);
+  color: var(--brand-primary);
+  border-left-color: var(--brand-primary);
 }
 
-.sidebar-link span[class^="ri-"] {
-  font-size: 1.25rem;
+.sidebar-link span[class^='ri-'] {
+  font-size: 1.35rem;
   flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.sidebar-link:hover span[class^='ri-'],
+.sidebar-link.active span[class^='ri-'] {
+  color: var(--brand-primary);
 }
 
 .sidebar-link .hide-menu {
   flex: 1;
   white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.collapsed .hide-menu {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sidebar-link .badge {
   margin-left: auto;
 }
 
-.has-arrow::after {
-  content: "›";
+.sidebar-link .badge {
   margin-left: auto;
-  transition: transform 0.2s ease;
+}
+
+.sidebar-arrow {
+  transition: transform 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.menu-open .sidebar-arrow {
+  transform: rotate(90deg);
 }
 
 .sub-menu {
   list-style: none;
-  padding: 0 0 0 2rem;
-  margin: 0;
+  padding: 0 0 0 1.25rem;
+  margin: 0.25rem 0;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sub-menu.show {
-  max-height: 200px;
+  max-height: 250px;
 }
 
 .sub-menu .sidebar-link {
-  padding: 10px 15px;
+  padding: 0.625rem 1rem;
   font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.sub-menu .sidebar-link.router-link-active {
+  background-color: var(--gray-50);
+  color: var(--brand-primary);
+  font-weight: 500;
 }
 
 .badge {
@@ -212,13 +238,14 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0.5rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  border-radius: 50px;
+  border-radius: 6px;
+  line-height: 1;
 }
 
 .bg-warning {
   background-color: var(--warning);
-  color: #212529;
+  color: var(--gray-900);
 }
 </style>

@@ -26,7 +26,6 @@
     "@electron-toolkit/utils": "^3.0.0",
     "@fontsource/rubik": "^5.2.8",
     "axios": "^1.6.0",
-    "electron-store": "^8.1.0",
     "pinia": "^2.1.7",
     "sql.js": "^1.10.0",
     "vue": "^3.4.0",
@@ -62,18 +61,28 @@
     },
     "files": [
       "out/**/*",
-      "!node_modules/**/*"
+      "node_modules/sql.js/**/*"
     ],
     "icon": "resources/icon.png",
     "win": {
       "target": [
-        "nsis"
-      ]
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "resources/icon.png"
     },
     "mac": {
       "target": [
-        "dmg"
-      ]
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "identity": "Apple Development: hadimazalan@gmail.com (ANLT527U66)",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
     },
     "linux": {
       "target": [

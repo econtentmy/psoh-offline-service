@@ -1,225 +1,307 @@
 <template>
-  <div class="recording-page">
+  <div class="recording-page p-2">
     <div v-if="loading" class="text-center py-5">
-      <span class="ri-loader-4-line spin"></span> Memuatkan...
+      <div class="d-flex flex-column align-items-center gap-3">
+        <span class="ri-loader-4-line fs-2 spin text-primary"></span>
+        <span class="text-muted small fw-medium">Memuatkan maklumat tugasan...</span>
+      </div>
     </div>
 
     <template v-else-if="assignment">
-      <!-- Nav tabs -->
-      <ul class="nav-tabs">
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            :class="{ active: activeTab === 'maklumat' }"
-            @click="activeTab = 'maklumat'"
-          >
-            Maklumat Asas
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            :class="{ active: activeTab === 'tag' }"
-            @click="activeTab = 'tag'"
-          >
-            Perekodan Tag
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            :class="{ active: activeTab === 'lokasi' }"
-            @click="activeTab = 'lokasi'"
-          >
-            Lokasi Penandaan
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            :class="{ active: activeTab === 'aktiviti' }"
-            @click="activeTab = 'aktiviti'"
-          >
-            Aktiviti
-          </a>
-        </li>
-      </ul>
-
-      <div class="tab-content bg-white p-4">
-        <!-- Maklumat Asas -->
-        <div v-show="activeTab === 'maklumat'" class="tab-pane">
-          <h5 class="mb-3">Maklumat Asas</h5>
-          <div class="row">
-            <div class="col-6 mb-3">
-              <label class="form-label text-muted">No. Rujukan Surat Kelulusan</label>
-              <p class="mb-0 fw-bold">{{ assignment.no_ruj_surat_lulus || '-' }}</p>
-            </div>
-            <div class="col-6 mb-3">
-              <label class="form-label text-muted">Status Tanah</label>
-              <p class="mb-0 fw-bold">{{ formatStatusTanah(assignment.status_tanah) }}</p>
-            </div>
-            <div class="col-6 mb-3">
-              <label class="form-label text-muted">Daerah</label>
-              <p class="mb-0 fw-bold">{{ formatDaerah(assignment.daerah) }}</p>
-            </div>
-            <div class="col-6 mb-3">
-              <label class="form-label text-muted">Kompartmen</label>
-              <p class="mb-0 fw-bold">{{ formatKompartmen(assignment.kompartmen) }}</p>
-            </div>
-            <div class="col-6 mb-3">
-              <label class="form-label text-muted">Kaedah</label>
-              <p class="mb-0 fw-bold">{{ formatKaedah(assignment.kaedah) }}</p>
-            </div>
-          </div>
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
+        <div>
+          <h4 class="mb-1 text-uppercase fw-bold text-dark">Perekodan Lapangan</h4>
+          <p class="text-muted small mb-0">{{ assignment.no_ruj_surat_lulus }}</p>
         </div>
+        <router-link
+          to="/assignments"
+          class="btn btn-light btn-sm px-3 d-flex align-items-center gap-2"
+        >
+          <span class="ri-arrow-left-line"></span> Kembali
+        </router-link>
+      </div>
 
-        <!-- Perekodan Tag -->
-        <div v-show="activeTab === 'tag'" class="tab-pane">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Perekodan Tag Pokok</h5>
-            <button class="btn btn-rounded btn-info" @click="showTagModal = true">
-              <span class="ri-add-line"></span> Tambah Tag
+      <!-- Modern Nav tabs -->
+      <div class="card border-0 shadow-sm mb-4">
+        <ul class="nav nav-pills custom-nav p-2">
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: activeTab === 'maklumat' }"
+              @click="activeTab = 'maklumat'"
+            >
+              <span class="ri-information-line"></span> Asas
             </button>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-              <thead class="bg-info text-light">
-                <tr>
-                  <th>Bil.</th>
-                  <th>No. Tag</th>
-                  <th>Jenis</th>
-                  <th>Spesies</th>
-                  <th>Ukurlilit</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="tagRecords.length === 0">
-                  <td colspan="6" class="text-center">Tiada rekod</td>
-                </tr>
-                <tr v-for="(tag, index) in tagRecords" :key="tag.id">
-                  <td>{{ index + 1 }}.</td>
-                  <td>{{ tag.no_tag }}</td>
-                  <td>{{ tag.jenis_tag }}</td>
-                  <td>{{ tag.kod_spesies }}</td>
-                  <td>{{ tag.ukurlilit_paras_dada }} cm</td>
-                  <td>
-                    <span class="badge" :class="tag.sync_status === 'synced' ? 'bg-success' : 'bg-warning'">
-                      {{ tag.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Lokasi Penandaan -->
-        <div v-show="activeTab === 'lokasi'" class="tab-pane">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Lokasi Penandaan</h5>
-            <button class="btn btn-rounded btn-info" @click="showLokasiModal = true">
-              <span class="ri-add-line"></span> Tambah Lokasi
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: activeTab === 'tag' }"
+              @click="activeTab = 'tag'"
+            >
+              <span class="ri-price-tag-3-line"></span> Perekodan Tag
             </button>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-              <thead class="bg-info text-light">
-                <tr>
-                  <th>Bil.</th>
-                  <th>Tarikh</th>
-                  <th>Masa Mula</th>
-                  <th>Masa Tamat</th>
-                  <th>Catatan</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="lokasiRecords.length === 0">
-                  <td colspan="6" class="text-center">Tiada rekod</td>
-                </tr>
-                <tr v-for="(lok, index) in lokasiRecords" :key="lok.id">
-                  <td>{{ index + 1 }}.</td>
-                  <td>{{ lok.tarikh }}</td>
-                  <td>{{ lok.masa_mula }}</td>
-                  <td>{{ lok.masa_tamat }}</td>
-                  <td>{{ lok.catatan || '-' }}</td>
-                  <td>
-                    <span class="badge" :class="lok.sync_status === 'synced' ? 'bg-success' : 'bg-warning'">
-                      {{ lok.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Aktiviti -->
-        <div v-show="activeTab === 'aktiviti'" class="tab-pane">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Aktiviti Penandaan</h5>
-            <button class="btn btn-rounded btn-info" @click="showAktivitiModal = true">
-              <span class="ri-add-line"></span> Tambah Aktiviti
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: activeTab === 'lokasi' }"
+              @click="activeTab = 'lokasi'"
+            >
+              <span class="ri-map-pin-line"></span> Lokasi
             </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: activeTab === 'aktiviti' }"
+              @click="activeTab = 'aktiviti'"
+            >
+              <span class="ri-calendar-line"></span> Aktiviti
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-0">
+          <!-- Maklumat Asas -->
+          <div v-show="activeTab === 'maklumat'" class="p-4">
+            <h6 class="fw-bold mb-4 text-primary d-flex align-items-center gap-2">
+              <span class="ri-survey-line"></span> Maklumat Terperinci Tugasan
+            </h6>
+            <div class="row g-4">
+              <div class="col-6">
+                <div class="info-group">
+                  <label class="text-muted small fw-bold text-uppercase mb-2 d-block"
+                    >No. Rujukan Surat</label
+                  >
+                  <p class="text-dark fw-semibold fs-5 mb-0">
+                    {{ assignment.no_ruj_surat_lulus || '-' }}
+                  </p>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="info-group">
+                  <label class="text-muted small fw-bold text-uppercase mb-2 d-block"
+                    >Status Tanah</label
+                  >
+                  <div>
+                    <span :class="['status-pill', assignment.status_tanah?.toLowerCase()]">
+                      {{ formatStatusTanah(assignment.status_tanah) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="info-group">
+                  <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Daerah</label>
+                  <p class="text-dark fw-medium">{{ formatDaerah(assignment.daerah) }}</p>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="info-group">
+                  <label class="text-muted small fw-bold text-uppercase mb-2 d-block"
+                    >Kompartmen</label
+                  >
+                  <p class="text-dark fw-medium">{{ formatKompartmen(assignment.kompartmen) }}</p>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="info-group">
+                  <label class="text-muted small fw-bold text-uppercase mb-2 d-block"
+                    >Kaedah Pelaksanaan</label
+                  >
+                  <p class="text-dark fw-medium">{{ formatKaedah(assignment.kaedah) }}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
-              <thead class="bg-info text-light">
-                <tr>
-                  <th>Bil.</th>
-                  <th>Tarikh</th>
-                  <th>Aktiviti</th>
-                  <th>Catatan</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="aktivitiRecords.length === 0">
-                  <td colspan="5" class="text-center">Tiada rekod</td>
-                </tr>
-                <tr v-for="(akt, index) in aktivitiRecords" :key="akt.id">
-                  <td>{{ index + 1 }}.</td>
-                  <td>{{ akt.tarikh }}</td>
-                  <td>{{ akt.aktiviti }}</td>
-                  <td>{{ akt.catatan || '-' }}</td>
-                  <td>
-                    <span class="badge" :class="akt.sync_status === 'synced' ? 'bg-success' : 'bg-warning'">
-                      {{ akt.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Perekodan Tag -->
+          <div v-show="activeTab === 'tag'">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                <span class="ri-price-tag-3-line"></span> Rekod Tag Pokok
+              </h6>
+              <button
+                class="btn btn-primary btn-sm px-3 d-flex align-items-center gap-2"
+                @click="showTagModal = true"
+              >
+                <span class="ri-add-line"></span> Tambah Tag
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th class="ps-4">Bil.</th>
+                    <th>No. Tag</th>
+                    <th>Jenis Tag</th>
+                    <th>Spesies</th>
+                    <th>Ukurlilit (cm)</th>
+                    <th class="text-center pe-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="tagRecords.length === 0">
+                    <td colspan="6" class="text-center py-5 text-muted">Tiada rekod tag ditemui</td>
+                  </tr>
+                  <tr v-for="(tag, index) in tagRecords" :key="tag.id">
+                    <td class="ps-4 text-muted">{{ index + 1 }}.</td>
+                    <td class="fw-semibold text-dark">{{ tag.no_tag }}</td>
+                    <td>
+                      <span class="badge bg-light text-dark fw-medium px-2 py-1">{{
+                        tag.jenis_tag
+                      }}</span>
+                    </td>
+                    <td>{{ tag.kod_spesies }}</td>
+                    <td>{{ tag.ukurlilit_paras_dada }}</td>
+                    <td class="text-center pe-4">
+                      <span
+                        :class="['sync-badge', tag.sync_status === 'synced' ? 'synced' : 'pending']"
+                      >
+                        {{ tag.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Lokasi Penandaan -->
+          <div v-show="activeTab === 'lokasi'">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                <span class="ri-map-pin-line"></span> Rekod Lokasi
+              </h6>
+              <button
+                class="btn btn-primary btn-sm px-3 d-flex align-items-center gap-2"
+                @click="showLokasiModal = true"
+              >
+                <span class="ri-add-line"></span> Tambah Lokasi
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th class="ps-4">Bil.</th>
+                    <th>Tarikh</th>
+                    <th>Masa</th>
+                    <th>Catatan</th>
+                    <th class="text-center pe-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="lokasiRecords.length === 0">
+                    <td colspan="5" class="text-center py-5 text-muted">
+                      Tiada rekod lokasi ditemui
+                    </td>
+                  </tr>
+                  <tr v-for="(lok, index) in lokasiRecords" :key="lok.id">
+                    <td class="ps-4 text-muted">{{ index + 1 }}.</td>
+                    <td class="fw-semibold text-dark">{{ lok.tarikh }}</td>
+                    <td>
+                      <small class="text-muted fw-medium"
+                        >{{ lok.masa_mula }} - {{ lok.masa_tamat }}</small
+                      >
+                    </td>
+                    <td>{{ lok.catatan || '-' }}</td>
+                    <td class="text-center pe-4">
+                      <span
+                        :class="['sync-badge', lok.sync_status === 'synced' ? 'synced' : 'pending']"
+                      >
+                        {{ lok.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Aktiviti -->
+          <div v-show="activeTab === 'aktiviti'">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                <span class="ri-calendar-line"></span> Rekod Aktiviti
+              </h6>
+              <button
+                class="btn btn-primary btn-sm px-3 d-flex align-items-center gap-2"
+                @click="showAktivitiModal = true"
+              >
+                <span class="ri-add-line"></span> Tambah Aktiviti
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th class="ps-4">Bil.</th>
+                    <th>Tarikh</th>
+                    <th>Jenis Aktiviti</th>
+                    <th>Catatan</th>
+                    <th class="text-center pe-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="aktivitiRecords.length === 0">
+                    <td colspan="5" class="text-center py-5 text-muted">
+                      Tiada rekod aktiviti ditemui
+                    </td>
+                  </tr>
+                  <tr v-for="(akt, index) in aktivitiRecords" :key="akt.id">
+                    <td class="ps-4 text-muted">{{ index + 1 }}.</td>
+                    <td class="fw-semibold text-dark">{{ akt.tarikh }}</td>
+                    <td>
+                      <span class="badge bg-light text-primary fw-medium px-2 py-1">{{
+                        akt.aktiviti
+                      }}</span>
+                    </td>
+                    <td>{{ akt.catatan || '-' }}</td>
+                    <td class="text-center pe-4">
+                      <span
+                        :class="['sync-badge', akt.sync_status === 'synced' ? 'synced' : 'pending']"
+                      >
+                        {{ akt.sync_status === 'synced' ? 'Disinkronkan' : 'Menunggu' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </template>
 
     <div v-else class="text-center py-5">
-      Tugasan tidak dijumpai
+      <div class="d-flex flex-column align-items-center gap-2">
+        <span class="ri-error-warning-line fs-2 text-warning"></span>
+        <h5 class="text-dark fw-bold">Tugasan Tidak Dijumpai</h5>
+        <p class="text-muted small">Sila pastikan anda memilih tugasan yang sah dari senarai.</p>
+        <router-link to="/assignments" class="btn btn-primary btn-sm px-4"
+          >Kembali ke Senarai</router-link
+        >
+      </div>
     </div>
 
-    <!-- Tag Modal -->
+    <!-- Modals -->
     <TagRecordingModal
       v-if="showTagModal"
       :assignment-id="assignmentId"
       @close="showTagModal = false"
       @saved="onTagSaved"
     />
-
-    <!-- Lokasi Modal -->
     <LokasiRecordingModal
       v-if="showLokasiModal"
       :assignment-id="assignmentId"
       @close="showLokasiModal = false"
       @saved="onLokasiSaved"
     />
-
-    <!-- Aktiviti Modal -->
     <AktivitiRecordingModal
       v-if="showAktivitiModal"
       :assignment-id="assignmentId"
@@ -246,19 +328,15 @@ const showTagModal = ref(false)
 const showLokasiModal = ref(false)
 const showAktivitiModal = ref(false)
 
-// Local records
 const tagRecords = ref<any[]>([])
 const lokasiRecords = ref<any[]>([])
 const aktivitiRecords = ref<any[]>([])
-
-// Reference data for lookups
 const daerahList = ref<any[]>([])
 
 const loading = computed(() => assignmentsStore.loading)
 const assignment = computed(() => assignmentsStore.currentAssignment)
 
 async function loadRecords(): Promise<void> {
-  // Load from local database
   const pending = await window.api.getPendingRecords()
   tagRecords.value = pending.tags.filter((t) => t.tp_pokok_a_id === assignmentId.value)
   lokasiRecords.value = pending.lokasi.filter((l) => l.tp_pokok_a_id === assignmentId.value)
@@ -280,66 +358,51 @@ async function onAktivitiSaved(): Promise<void> {
   await loadRecords()
 }
 
-// Format status tanah for display
 function formatStatusTanah(status: string | null | undefined): string {
   if (!status) return '-'
   const statusMap: Record<string, string> = {
-    'hsk': 'Hutan Simpan Kekal (HSK)',
-    'HSK': 'Hutan Simpan Kekal (HSK)',
-    'tk': 'Tanah Kerajaan (TK)',
-    'TK': 'Tanah Kerajaan (TK)',
-    'tr': 'Tanah Rizab (TR)',
-    'TR': 'Tanah Rizab (TR)'
+    hsk: 'HSK',
+    HSK: 'HSK',
+    tk: 'TK',
+    TK: 'TK',
+    tr: 'TR',
+    TR: 'TR'
   }
   return statusMap[status] || status
 }
 
-// Format daerah - lookup name from reference data
 function formatDaerah(daerah: string | number | null | undefined): string {
   if (!daerah) return '-'
   const found = daerahList.value.find((d) => d.id === Number(daerah) || d.kod === String(daerah))
   return found?.nama || String(daerah)
 }
 
-// Format kompartmen from JSON array to readable string
 function formatKompartmen(kompartmen: string | null | undefined): string {
   if (!kompartmen) return '-'
-  
   try {
-    // Try to parse as JSON
     const arr = typeof kompartmen === 'string' ? JSON.parse(kompartmen) : kompartmen
-    
     if (Array.isArray(arr)) {
-      // Extract 'no' values from the array of objects
       const numbers = arr.map((item: any) => item.no || item).filter(Boolean)
       return numbers.join(', ') || '-'
     }
-    
     return String(kompartmen)
   } catch {
-    // If not valid JSON, return as-is
     return String(kompartmen)
   }
 }
 
-// Format kaedah pelaksanaan
 function formatKaedah(kaedah: number | string | null | undefined): string {
   if (!kaedah) return '-'
-  const kaedahMap: Record<string, string> = {
-    '1': 'Kontraktor',
-    '2': 'Jabatan'
-  }
+  const kaedahMap: Record<string, string> = { '1': 'Kontraktor', '2': 'Jabatan' }
   return kaedahMap[String(kaedah)] || String(kaedah)
 }
 
 onMounted(async () => {
-  // Load reference data for lookups (using daerah hutan / forest districts)
   try {
     daerahList.value = await window.api.getReferenceData('ref_daerah_hutan')
   } catch (e) {
-    console.error('Failed to load daerah hutan reference data:', e)
+    console.error('Failed to load reference data:', e)
   }
-  
   await assignmentsStore.fetchAssignment(assignmentId.value)
   await loadRecords()
 })
@@ -347,52 +410,128 @@ onMounted(async () => {
 
 <style scoped>
 .recording-page {
-  min-height: 400px;
+  min-height: 500px;
 }
 
-.nav-tabs {
-  display: flex;
+/* Custom Pills Nav */
+.nav {
+  display: flex !important;
   flex-wrap: wrap;
   padding-left: 0;
   margin-bottom: 0;
-  list-style: none;
-  border-bottom: 1px solid var(--gray-200);
-  background: #fff;
+  list-style: none !important;
 }
 
 .nav-item {
-  margin-bottom: -1px;
+  list-style: none !important;
 }
 
-.nav-link {
-  display: block;
-  padding: 0.75rem 1.25rem;
+.custom-nav {
+  gap: 0.5rem;
+}
+
+.custom-nav .nav-link {
+  border-radius: 8px;
   color: var(--gray-600);
-  background-color: transparent;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.6rem 1.25rem;
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
   border: 1px solid transparent;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  background: transparent;
   cursor: pointer;
-  text-decoration: none;
 }
 
-.nav-link:hover {
-  border-color: var(--gray-200) var(--gray-200) transparent;
+.custom-nav .nav-link:hover:not(.active) {
+  background-color: var(--gray-50);
+  color: var(--brand-primary);
 }
 
-.nav-link.active {
-  color: var(--gray-700);
-  background-color: #fff;
-  border-color: var(--gray-200) var(--gray-200) #fff;
-  font-weight: 500;
+.custom-nav .nav-link.active {
+  background-color: var(--light-primary);
+  color: var(--brand-primary);
+  border-color: var(--light-primary);
 }
 
-.tab-content {
-  border: 1px solid var(--gray-200);
-  border-top: none;
+.custom-nav .nav-link span {
+  font-size: 1.1rem;
 }
 
-.fw-bold {
-  font-weight: 500 !important;
+/* Info Group */
+.info-group label {
+  letter-spacing: 0.025em;
+}
+
+/* Table Enhancements */
+.table thead th {
+  background-color: var(--gray-50);
+  color: var(--gray-600);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody td {
+  padding: 1rem 0.75rem;
+  font-size: 0.9375rem;
+}
+
+/* Sync Badges */
+.sync-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.sync-badge.synced {
+  background-color: var(--light-success);
+  color: var(--success);
+}
+.sync-badge.pending {
+  background-color: var(--light-warning);
+  color: var(--warning);
+}
+
+/* Status Pills */
+.status-pill {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.hsk {
+  background-color: var(--light-primary);
+  color: var(--primary);
+}
+.status-pill.tk {
+  background-color: var(--light-warning);
+  color: var(--warning);
+}
+.status-pill.tr {
+  background-color: var(--light-info);
+  color: var(--brand-secondary);
+}
+
+.spin {
+  animation: spinner 1.5s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

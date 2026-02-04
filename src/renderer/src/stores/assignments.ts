@@ -8,6 +8,7 @@ export interface Assignment {
   status_id: number
   kaedah: string
   no_ruj_surat_lulus?: string
+  no_fail?: string
   status_tanah?: string
   daerah?: string
   kompartmen?: string

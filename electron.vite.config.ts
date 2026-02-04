@@ -4,7 +4,14 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [
+      externalizeDepsPlugin({
+        exclude: [
+          '@electron-toolkit/utils',
+          'axios'
+        ]
+      })
+    ],
     build: {
       rollupOptions: {
         external: ['sql.js']
@@ -12,7 +19,11 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [
+      externalizeDepsPlugin({
+        exclude: ['@electron-toolkit/preload']
+      })
+    ]
   },
   renderer: {
     resolve: {

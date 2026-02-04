@@ -1,4 +1,3 @@
-import initSqlJs, { Database as SqlJsDatabase } from 'sql.js'
 import { app } from 'electron'
 import { join } from 'path'
 import {
@@ -11,6 +10,22 @@ import {
   readFileSync,
   writeFileSync
 } from 'fs'
+
+// sql.js types - using any to avoid bundling issues
+type SqlJsDatabase = any
+
+let sqlJsModule: any = null
+
+async function getSqlJs(): Promise<any> {
+  if (!sqlJsModule) {
+    // Use dynamic require for sql.js to work around bundling issues
+    const initSqlJs = require('sql.js')
+    // Handle both default export and named export
+    const init = initSqlJs.default || initSqlJs
+    sqlJsModule = await init()
+  }
+  return sqlJsModule
+}
 
 export class DatabaseService {
   private static instance: DatabaseService
@@ -49,7 +64,7 @@ export class DatabaseService {
     this.dbPath = join(dbDir, this.DB_NAME)
 
     // Initialize sql.js
-    const SQL = await initSqlJs()
+    const SQL = await getSqlJs()
 
     // Load existing database or create new one
     if (existsSync(this.dbPath)) {
@@ -316,6 +331,12 @@ export class DatabaseService {
             sync_at DATETIME
           );
         `
+      },
+      {
+        name: '003_add_no_fail_column',
+        sql: `
+          ALTER TABLE tp_pokok_a ADD COLUMN no_fail TEXT;
+        `
       }
     ]
 
@@ -514,7 +535,7 @@ export class DatabaseService {
       // No pending records - safe to update
       this.run(
         `UPDATE tp_pokok_a SET 
-          permohonan_id = ?, status_id = ?, kaedah = ?, no_ruj_surat_lulus = ?, 
+          permohonan_id = ?, status_id = ?, kaedah = ?, no_ruj_surat_lulus = ?, no_fail = ?,
           status_tanah = ?, daerah = ?, kompartmen = ?, sync_status = 'synced', sync_at = datetime('now')
         WHERE remote_id = ?`,
         [
@@ -522,6 +543,7 @@ export class DatabaseService {
           safeValue(data.status_id),
           safeValue(data.kaedah),
           safeValue(data.no_ruj_surat_lulus),
+          safeValue(data.no_fail),
           safeValue(data.status_tanah),
           safeValue(data.daerah),
           safeValue(data.kompartmen),
@@ -535,14 +557,15 @@ export class DatabaseService {
     // New assignment - insert
     const result = this.run(
       `INSERT INTO tp_pokok_a 
-       (remote_id, permohonan_id, status_id, kaedah, no_ruj_surat_lulus, status_tanah, daerah, kompartmen, sync_status, sync_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'synced', datetime('now'))`,
+       (remote_id, permohonan_id, status_id, kaedah, no_ruj_surat_lulus, no_fail, status_tanah, daerah, kompartmen, sync_status, sync_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'synced', datetime('now'))`,
       [
         safeValue(data.remote_id),
         safeValue(data.permohonan_id),
         safeValue(data.status_id),
         safeValue(data.kaedah),
         safeValue(data.no_ruj_surat_lulus),
+        safeValue(data.no_fail),
         safeValue(data.status_tanah),
         safeValue(data.daerah),
         safeValue(data.kompartmen)
