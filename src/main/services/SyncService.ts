@@ -1,7 +1,13 @@
 import { EventEmitter } from 'events'
 import axios, { AxiosInstance } from 'axios'
+import https from 'https'
 import { DatabaseService } from './DatabaseService'
 import { BrowserWindow } from 'electron'
+
+// HTTPS agent that accepts self-signed certificates
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+})
 
 export class SyncService extends EventEmitter {
   private static instance: SyncService
@@ -27,7 +33,8 @@ export class SyncService extends EventEmitter {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-      timeout: 30000
+      timeout: 30000,
+      httpsAgent
     })
   }
 

@@ -1,6 +1,12 @@
 import { ipcMain } from 'electron'
 import axios from 'axios'
+import https from 'https'
 import { SecureStorage } from '../services/SecureStorage'
+
+// HTTPS agent that accepts self-signed certificates
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+})
 import { DatabaseService } from '../services/DatabaseService'
 import { NetworkMonitor } from '../services/NetworkMonitor'
 import { SyncService } from '../services/SyncService'
@@ -31,7 +37,8 @@ ipcMain.handle('test-api-connection', async (_, apiUrl: string, apiToken: string
         Authorization: `Bearer ${apiToken}`,
         Accept: 'application/json'
       },
-      timeout: 10000
+      timeout: 10000,
+      httpsAgent
     })
 
     if (response.data.success === false) {
@@ -67,6 +74,8 @@ ipcMain.handle('test-api-connection', async (_, apiUrl: string, apiToken: string
       errorMessage = 'Sambungan tamat masa. Sila cuba lagi.'
     } else if (error.code === 'ERR_NETWORK') {
       errorMessage = 'Tiada sambungan rangkaian. Sila semak sambungan internet anda.'
+    } else if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' || error.message?.includes('certificate')) {
+      errorMessage = 'Sijil SSL tidak sah. Sila hubungi pentadbir sistem.'
     }
 
     console.error('API Connection Error:', error.code, error.message, error.response?.data)
